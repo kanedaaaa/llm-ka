@@ -20,6 +20,10 @@ export default function Home() {
     setInput("")
     setIsLoading(true)
 
+    // Add the user message immediately
+    const updatedMessages = [...messages, { role: "user" as const, ge: newMessageGe, en: "" }]
+    setMessages(updatedMessages)
+
     try {
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
@@ -95,9 +99,9 @@ export default function Home() {
               {isLoading && (
                 <div className="p-4 rounded-2xl bg-muted max-w-[80%] mr-auto">
                   <div className="flex gap-2">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/20 animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/20 animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/20 animate-bounce"></div>
+                    <div className="w-3 h-3 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="w-3 h-3 rounded-full bg-primary/60 animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="w-3 h-3 rounded-full bg-primary/60 animate-bounce"></div>
                   </div>
                 </div>
               )}
