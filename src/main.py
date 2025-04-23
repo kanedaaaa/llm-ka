@@ -2,6 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Literal, List
 
+from mistral import call_mistral
+from translator import translate_to_georgian, translate_to_english
+
 app = FastAPI()
 
 class Message(BaseModel):
@@ -20,7 +23,7 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 def chat(payload: ChatRequest):
     try:
-        en_input = payload.new_message_ge # todo actually translate
+        en_input = translate_to_english(payload.new_message_ge) 
 
         updated_history = payload.history = [{
             "role": "user",
@@ -32,8 +35,8 @@ def chat(payload: ChatRequest):
             {"role": m.role, "content": m.en} for m in updated_history
         ]
 
-        en_response = mistral_messages # todo actually call mistral 
-        ge_response = en_response # todo actually translate 
+        en_response = call_mistral(mistral_messages) 
+        ge_response = translate_to_georgian(en_response) 
 
         updated_history.append({
             "role": "assistant",
