@@ -47,3 +47,13 @@ def chat(payload: ChatRequest):
         return {"history": updated_history}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
