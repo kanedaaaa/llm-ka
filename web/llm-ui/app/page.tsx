@@ -33,6 +33,7 @@ export default function Home() {
       })
 
       const data = await response.json()
+      console.log("logging data: ", data)
       setMessages(data.history)
     } catch (error) {
       console.error("Error sending message:", error)

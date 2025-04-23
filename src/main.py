@@ -16,7 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class Message(BaseModel):
     role: Literal["user", "assistant"]
     ge: str
@@ -33,28 +32,21 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 def chat(payload: ChatRequest):
     try:
-        en_input = translate_to_english(payload.new_message_ge) 
+        en_input = translate_to_english(payload.new_message_ge)
+        updated_history = payload.history.copy()
+        user_msg = Message(role="user", ge=payload.new_message_ge, en=en_input)
 
-        updated_history = payload.history = [{
-            "role": "user",
-            "get": payload.new_message_ge,
-            "en": en_input
-        }]
+        updated_history.append(user_msg)
 
-        mistral_messages = [
-            {"role": m.role, "content": m.en} for m in updated_history
-        ]
+        mistral_messages = [{"role": m.role, "content": m.en} for m in updated_history]
+        en_response = call_mistral(mistral_messages)
+        ge_response = translate_to_georgian(en_response)
+        assistant_msg = Message(role="assistant", ge=ge_response, en=en_response)
+        
+        updated_history.append(assistant_msg)
 
-        en_response = call_mistral(mistral_messages) 
-        ge_response = translate_to_georgian(en_response) 
+        return ChatResponse(history=updated_history)
 
-        updated_history.append({
-            "role": "assistant",
-            "ge": ge_response,
-            "en": en_response
-        })
-
-        return {"history": updated_history}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
