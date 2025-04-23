@@ -6,25 +6,39 @@ import { useState } from "react"
 
 export default function Home() {
   const [input, setInput] = useState("")
-  const [messages, setMessages] = useState<{ role: "user" | "assistant", content: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSend = () => {
+  const [messages, setMessages] = useState<
+    { role: "user" | "assistant"; ge: string; en: string }[]
+  >([])
+
+
+  const handleSend = async () => {
     if (!input.trim()) return
 
-    const userMessage = { role: "user" as const, content: input }
-    setMessages(prev => [...prev, userMessage])
+    const newMessageGe = input
     setInput("")
     setIsLoading(true)
 
-    setTimeout(() => {
-      const aiResponse = {
-        role: "assistant" as const,
-        content: "This is a dummy response. In a real implementation, this would be the LLM's response to your message: " + input
-      }
-      setMessages(prev => [...prev, aiResponse])
+    try {
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          new_message_ge: newMessageGe,
+          history: messages
+        })
+      })
+
+      const data = await response.json()
+      setMessages(data.history)
+    } catch (error) {
+      console.error("Error sending message:", error)
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -73,9 +87,10 @@ export default function Home() {
                     : "bg-muted"
                     } max-w-[80%] ${message.role === "user" ? "ml-auto" : "mr-auto"}`}
                 >
-                  {message.content}
+                  {message.ge}
                 </div>
               ))}
+
               {isLoading && (
                 <div className="p-4 rounded-2xl bg-muted max-w-[80%] mr-auto">
                   <div className="flex gap-2">

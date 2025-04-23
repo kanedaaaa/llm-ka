@@ -1,11 +1,21 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Literal, List
+from fastapi.middleware.cors import CORSMiddleware
 
 from mistral import call_mistral
 from translator import translate_to_georgian, translate_to_english
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class Message(BaseModel):
     role: Literal["user", "assistant"]
